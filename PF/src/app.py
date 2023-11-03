@@ -3,7 +3,7 @@ import streamlit as st
 from data_processing import preprocess_and_categorize
 
 # Load and preprocess the data
-data_path = 'fdata.csv'
+data_path = "PF/data/fdata.csv"
 df = preprocess_and_categorize(data_path)
 
 st.title('Personal Finance Analysis')

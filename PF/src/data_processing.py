@@ -2,7 +2,7 @@ import pandas as pd
 
 def preprocess_and_categorize(data_path):
     # Load the data
-    df = pd.read_csv('fdata.csv')
+    df = pd.read_csv('PF/data/fdata.csv')
 
     # Categorize expenses based on transaction descriptions
     def categorize_expense(description):
