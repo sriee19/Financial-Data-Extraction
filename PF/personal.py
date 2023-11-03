@@ -1,16 +1,22 @@
 import pandas as pd
 
 # Load the bank statement data (replace with your data source)
-df = pd.read_csv('bank_statement.csv')
+df = pd.read_csv('fdata.csv')
 
 # Define a function to categorize expenses
 def categorize_expense(description):
-    # Implement your logic to categorize expenses here
-    # You can use if-else statements or regex patterns
-    if "rent" in description.lower():
+    # Convert the description to lowercase for case-insensitive matching
+    description = description.lower()
+
+    # Define your categorization logic using if-else statements or regex patterns
+    if "rent" in description:
         return "Housing"
-    elif "groceries" in description.lower():
+    elif "groceries" in description:
         return "Food"
+    elif "dining" in description or "restaurant" in description:
+        return "Dining Out"
+    elif "utility" in description:
+        return "Utilities"
     else:
         return "Other"
 
