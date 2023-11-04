@@ -1,50 +1,82 @@
+# # app.py
+# import streamlit as st
+# from data_processing import preprocess_and_categorize, extract_data_from_pdf
+# import pandas as pd
+
+# st.title('Personal Finance Analysis')
+
+# # File Upload Widget
+# st.subheader('Upload Your Financial Data (PDF only)')
+# uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
+
+# if uploaded_file is not None:
+#     # Check the file type
+#     file_extension = uploaded_file.name.split('.')[-1]
+#     if file_extension == 'pdf':
+#         pdf_data = extract_data_from_pdf(uploaded_file)
+#         df = preprocess_and_categorize(pdf_data)
+
+#         # Calculate profit/loss and bank balance
+#         income_categories = ['Salary', 'Other Income']
+#         expenses_categories = ['Housing', 'Food', 'Utilities', 'Transportation', 'Entertainment', 'Other']
+
+#         df['Income'] = df[df['Category'].isin(income_categories)]['Amount']
+#         df['Expenses'] = df[df['Category'].isin(expenses_categories)]['Amount']
+#         df['Profit/Loss'] = df['Income'].sum() - df['Expenses'].sum()
+
+#         df['Bank Balance'] = df['Amount'].cumsum()
+
+#         # Display the preprocessed data and financial metrics
+#         st.subheader('Preprocessed Data')
+#         st.write(df)
+
+#         # Display financial metrics
+#         st.subheader('Financial Metrics')
+#         st.write('Total Income:', df['Income'].sum())
+#         st.write('Total Expenses:', df['Expenses'].sum())
+#         st.write('Profit/Loss:', df['Profit/Loss'])
+#         st.write('Bank Balance:', df['Bank Balance'].iloc[-1])
+#     else:
+#         st.error('Please upload a PDF file for processing.')
+
+
 # app.py
 import streamlit as st
-from data_processing import preprocess_and_categorize
-
-# Load and preprocess the data
-data_path = "PF/data/fdata.csv"
-df = preprocess_and_categorize(data_path)
+from data_processing import preprocess_and_categorize, extract_data_from_pdf
+import pandas as pd
 
 st.title('Personal Finance Analysis')
 
-# Display raw data
-st.subheader('Raw Data')
-st.write(df)
+# File Upload Widget
+st.subheader('Upload Your Financial Data (PDF only)')
+uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
 
-# Create Streamlit widgets for user interaction
+if uploaded_file is not None:
+    # Check the file type
+    file_extension = uploaded_file.name.split('.')[-1]
+    if file_extension == 'pdf':
+        pdf_data = extract_data_from_pdf(uploaded_file)
+        df = preprocess_and_categorize(pdf_data)
 
-# Select box to filter data by expense category
-st.subheader('Filter Data by Expense Category')
-selected_category = st.selectbox('Select an Expense Category', ['All'] + df['Category'].unique())
-if selected_category != 'All':
-    filtered_df = df[df['Category'] == selected_category]
-else:
-    filtered_df = df
+        # Calculate profit/loss and bank balance
+        income_categories = ['Salary', 'Other Income']
+        expenses_categories = ['Housing', 'Food', 'Utilities', 'Transportation', 'Entertainment', 'Other']
 
-st.write('Displaying data for:', selected_category)
-st.write(filtered_df)
+        df['Income'] = df[df['Category'].isin(income_categories)]['Amount']
+        df['Expenses'] = df[df['Category'].isin(expenses_categories)]['Amount']
+        df['Profit/Loss'] = df['Income'].sum() - df['Expenses'].sum()
 
-# Sidebar Date Range Selector
-st.sidebar.subheader('Date Range Selector')
-start_date = st.sidebar.date_input('Start Date', min_value=df['Date'].min(), max_value=df['Date'].max())
-end_date = st.sidebar.date_input('End Date', min_value=df['Date'].min(), max_value=df['Date'].max())
+        df['Bank Balance'] = df['Amount'].cumsum()
 
-# Filter data based on the selected date range
-date_filtered_df = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
+        # Display the preprocessed data and financial metrics
+        st.subheader('Preprocessed Data')
+        st.write(df)
 
-st.subheader('Data for Selected Date Range')
-st.write(date_filtered_df)
-
-# Bar chart to visualize expenses by category
-st.subheader('Expense Category Breakdown')
-category_expenses = df.groupby('Category')['Amount'].sum()
-st.bar_chart(category_expenses)
-
-# Display total income, total expenses, profit/loss, and bank balance
-st.subheader('Financial Summary')
-st.write('Total Income:', df['Income'].sum())
-st.write('Total Expenses:', df['Expenses'].sum())
-st.write('Profit/Loss:', df['Profit/Loss'].sum())
-st.write('Bank Balance:', df['Bank Balance'].iloc[-1])
-
+        # Display financial metrics
+        st.subheader('Financial Metrics')
+        st.write('Total Income:', df['Income'].sum())
+        st.write('Total Expenses:', df['Expenses'].sum())
+        st.write('Profit/Loss:', df['Profit/Loss'])
+        st.write('Bank Balance:', df['Bank Balance'].iloc[-1])
+    else:
+        st.error('Please upload a PDF file for processing.')
