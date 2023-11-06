@@ -37,3 +37,4 @@ def categorize_expense(description):
         return "Food"
     else:
         return "Other"
+
