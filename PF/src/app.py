@@ -14,9 +14,6 @@ if uploaded_file is not None:
     pdf_data = extract_data_from_pdf(uploaded_file)
     df = preprocess_and_categorize(pdf_data)
 
-    # Convert 'Date' column to datetime
-    df['Date'] = pd.to_datetime(df['Date'])
-
     # Calculate bank balance
     df['Bank Balance'] = df['Amount'].cumsum()
 
@@ -32,27 +29,19 @@ if uploaded_file is not None:
     lower_spendings['Type'] = 'Lower Spendings'
     combined_df = pd.concat([higher_expenses, lower_spendings])
 
-    line_fig = px.line(combined_df, x='Date', y='Amount', labels={'Amount': 'Expense Amount'}, 
+    line_fig = px.line(combined_df, x=combined_df.index, y='Amount', labels={'Amount': 'Expense Amount'}, 
                       title='Expense Over Time for Higher Expenses and Lower Spendings', color='Type')
 
     # Create a line graph for bank balance over time
-    balance_fig = px.line(df, x='Date', y='Bank Balance', labels={'Bank Balance': 'Balance'},
-                          title='Bank Balance Over Time')
-    
+    balance_fig = px.line(df, x=df.index, y='Bank Balance', labels={'Bank Balance': 'Balance'},
+                         title='Bank Balance Over Time')
+
     # Display the table with higher expenses and lower spendings
     st.subheader('Higher Expenses')
     st.write(higher_expenses)
 
     st.subheader('Lower Spendings')
     st.write(lower_spendings)
-
-    # Display the line graph for expenses
-    st.subheader('Expense Over Time')
-    st.plotly_chart(line_fig)
-
-    # Display the line graph for bank balance
-    st.subheader('Bank Balance Over Time')
-    st.plotly_chart(balance_fig)
 
     # Display financial metrics
     st.subheader('Financial Metrics')
@@ -61,3 +50,11 @@ if uploaded_file is not None:
     # Calculate and display the closing balance
     closing_balance = df['Bank Balance'].iloc[-1]
     st.write('Closing Balance:', closing_balance)
+
+    # Display the line graph for expenses
+    st.subheader('Expense Over Time')
+    st.plotly_chart(line_fig)
+
+    # Display the line graph for bank balance
+    st.subheader('Bank Balance Over Time')
+    st.plotly_chart(balance_fig)
