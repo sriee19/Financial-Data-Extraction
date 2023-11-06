@@ -1,4 +1,3 @@
-# Import the required libraries
 import streamlit as st
 from data_processing import preprocess_and_categorize, extract_data_from_pdf
 import pandas as pd
@@ -20,15 +19,11 @@ def extract_and_format_date(description):
     # Return a default date if no date is found
     return "N/A"
 
-# Function to truncate descriptions
-def truncate_description(description, max_length=50):
-    return description[:max_length] + '...' if len(description) > max_length else description
-
 st.title('Personal Finance Analysis')
 
 # File Upload Widget
-st.subheader('Upload Your Financial Data (PDF only)')
-uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
+st.sidebar.subheader('Upload Your Financial Data (PDF only)')
+uploaded_file = st.sidebar.file_uploader("Choose a PDF file", type=["pdf"])
 
 if uploaded_file is not None:
     pdf_data = extract_data_from_pdf(uploaded_file)
@@ -40,8 +35,8 @@ if uploaded_file is not None:
     # Add a date column
     df['Date'] = df['Description'].apply(extract_and_format_date)
 
-    # Truncate descriptions for better display
-    df['Description'] = df['Description'].apply(truncate_description)
+    # Drop the Description column
+    df = df.drop(columns=['Description'])
 
     # Create a line graph for both higher expenses and lower spendings
     higher_expenses = df[df['Amount'] > 200]
@@ -58,25 +53,37 @@ if uploaded_file is not None:
     balance_fig = px.line(df, x='Date', y='Bank Balance', labels={'Bank Balance': 'Balance'},
                          title='Bank Balance Over Time')
 
-    # Display the table with higher expenses and lower spendings
-    st.subheader('Higher Expenses')
-    st.write(higher_expenses)
+    # Sidebar options
+    selected_option = st.sidebar.selectbox("Select an option:", ("All Expenses and Bank Balance", "Higher Expenses", "Lower Spendings"))
+    
+    selected_graph = st.sidebar.selectbox("Select a graph:", ("Expense Over Time", "Bank Balance Over Time"))
 
-    st.subheader('Lower Spendings')
-    st.write(lower_spendings)
+    if selected_option == "Higher Expenses":
+        # Display the table with higher expenses
+        st.subheader('Higher Expenses')
+        st.write(higher_expenses)
+    elif selected_option == "Lower Spendings":
+        # Display the table with lower spendings
+        st.subheader('Lower Spendings')
+        st.write(lower_spendings)
+    else:
+        # Display the table with all expenses and bank balances
+        st.subheader('Expenses and Bank Balance')
+        st.write(df)
 
-    # Display financial metrics
-    st.subheader('Financial Metrics')
-    st.write('Bank Balance:', df['Bank Balance'].iloc[-1])
+    # # Display financial metrics (moved to sidebar)
+    # st.sidebar.subheader('Financial Metrics')
+    # st.sidebar.write('Bank Balance:', df['Bank Balance'].iloc[-1])
 
-    # Calculate and display the closing balance
-    closing_balance = df['Bank Balance'].iloc[-1]
-    st.write('Closing Balance:', closing_balance)
+    # # Calculate and display the closing balance (moved to sidebar)
+    # closing_balance = df['Bank Balance'].iloc[-1]
+    # st.sidebar.write('Closing Balance:', closing_balance)
 
-    # Display the line graph for expenses
-    st.subheader('Expense Over Time')
-    st.plotly_chart(line_fig)
-
-    # Display the line graph for bank balance
-    st.subheader('Bank Balance Over Time')
-    st.plotly_chart(balance_fig)
+    if selected_graph == "Expense Over Time":
+        # Display the line graph for expenses
+        st.subheader('Expense Over Time')
+        st.plotly_chart(line_fig)
+    else:
+        # Display the line graph for bank balance
+        st.subheader('Bank Balance Over Time')
+        st.plotly_chart(balance_fig)
