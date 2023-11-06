@@ -1,5 +1,5 @@
-import fitz  # Import PyMuPDF
 import pandas as pd
+import fitz  # Import PyMuPDF
 
 def extract_data_from_pdf(pdf_file):
     pdf_data = []
@@ -13,22 +13,14 @@ def extract_data_from_pdf(pdf_file):
     return pdf_data
 
 def preprocess_and_categorize(pdf_data):
-    # Perform data preprocessing and categorization as needed
-    # This function can be extended based on your data and categorization logic
-    # Example logic for categorization is given here
-
     data = pd.DataFrame({'Description': pdf_data})
     data['Amount'] = data['Description'].str.extract(r'(\d+\.\d+)').astype(float)
     
     data['Category'] = data['Description'].apply(categorize_expense)
     
-    # You can add more preprocessing and categorization logic as required
-    
     return data
 
 def categorize_expense(description):
-    # Implement your logic to categorize expenses here
-    # Example: Categorize as 'Housing' if 'rent' is in the description
     if "rent" in description.lower():
         return "Housing"
     elif "Zomato" in description.lower():
@@ -37,4 +29,3 @@ def categorize_expense(description):
         return "Food"
     else:
         return "Other"
-
