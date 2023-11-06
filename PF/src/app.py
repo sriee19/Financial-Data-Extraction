@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 from data_processing import preprocess_and_categorize, extract_data_from_pdf
 import pandas as pd
