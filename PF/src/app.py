@@ -2,7 +2,6 @@ import streamlit as st
 from data_processing import preprocess_and_categorize, extract_data_from_pdf
 import pandas as pd
 import plotly.express as px
-import io  # Import io for BytesIO
 
 st.title('Personal Finance Analysis')
 
@@ -20,6 +19,8 @@ if uploaded_file is not None:
 
     df['Income'] = df[df['Category'].isin(income_categories)]['Amount']
     df['Expenses'] = df[df['Category'].isin(expenses_categories)]['Amount']
+    df['Profit/Loss'] = df['Income'].sum() - df['Expenses'].sum()
+
     df['Bank Balance'] = df['Amount'].cumsum()
 
     # Display the preprocessed data and financial metrics
@@ -30,25 +31,13 @@ if uploaded_file is not None:
     st.subheader('Financial Metrics')
     st.write('Total Income:', df['Income'].sum())
     st.write('Total Expenses:', df['Expenses'].sum())
+    st.write('Profit/Loss:', df['Profit/Loss'])
     st.write('Bank Balance:', df['Bank Balance'].iloc[-1])
 
- # Line chart to visualize balance over time
-st.subheader('Bank Balance Over Time (Resampled)')
-
-# Make sure 'Date' is a datetime column in your DataFrame
-df['Date'] = pd.to_datetime(df['Date'])
-
-# Set 'Date' as the DataFrame index
-df.set_index('Date', inplace=True)
-
-# Resample the data
-balance_resampled = df.resample('D').asfreq()
-balance_resampled['Bank Balance'] = balance_resampled['Bank Balance'].fillna(method='ffill')
-
-# Create a line chart
-balance_fig = px.line(balance_resampled, x=balance_resampled.index, y='Bank Balance', labels={'Bank Balance': 'Balance'}, title='Bank Balance Over Time (Daily)')
-balance_fig.update_xaxes(title_text='Date')
-balance_fig.update_yaxes(title_text='Balance')
-st.plotly_chart(balance_fig)
+    # Bar chart to visualize expenses by category
+    st.subheader('Expense Category Breakdown')
+    category_expenses = df.groupby('Category')['Amount'].sum().reset_index()
+    fig = px.bar(category_expenses, x='Category', y='Amount', labels={'Amount': 'Expense Amount'}, title='Expense Category Breakdown')
+    st.plotly_chart(fig)
 
 
