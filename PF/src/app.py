@@ -1,3 +1,4 @@
+# Import the required libraries
 import streamlit as st
 from data_processing import preprocess_and_categorize, extract_data_from_pdf
 import pandas as pd
@@ -13,12 +14,45 @@ if uploaded_file is not None:
     pdf_data = extract_data_from_pdf(uploaded_file)
     df = preprocess_and_categorize(pdf_data)
 
+    # Convert 'Date' column to datetime
+    df['Date'] = pd.to_datetime(df['Date'])
+
     # Calculate bank balance
     df['Bank Balance'] = df['Amount'].cumsum()
 
     # Display the preprocessed data and financial metrics
     st.subheader('Preprocessed Data')
     st.write(df)
+
+    # Create a line graph for both higher expenses and lower spendings
+    higher_expenses = df[df['Amount'] > 100]
+    lower_spendings = df[df['Amount'] < 100]
+
+    higher_expenses['Type'] = 'Higher Expenses'
+    lower_spendings['Type'] = 'Lower Spendings'
+    combined_df = pd.concat([higher_expenses, lower_spendings])
+
+    line_fig = px.line(combined_df, x='Date', y='Amount', labels={'Amount': 'Expense Amount'}, 
+                      title='Expense Over Time for Higher Expenses and Lower Spendings', color='Type')
+
+    # Create a line graph for bank balance over time
+    balance_fig = px.line(df, x='Date', y='Bank Balance', labels={'Bank Balance': 'Balance'},
+                          title='Bank Balance Over Time')
+    
+    # Display the table with higher expenses and lower spendings
+    st.subheader('Higher Expenses')
+    st.write(higher_expenses)
+
+    st.subheader('Lower Spendings')
+    st.write(lower_spendings)
+
+    # Display the line graph for expenses
+    st.subheader('Expense Over Time')
+    st.plotly_chart(line_fig)
+
+    # Display the line graph for bank balance
+    st.subheader('Bank Balance Over Time')
+    st.plotly_chart(balance_fig)
 
     # Display financial metrics
     st.subheader('Financial Metrics')
@@ -27,20 +61,3 @@ if uploaded_file is not None:
     # Calculate and display the closing balance
     closing_balance = df['Bank Balance'].iloc[-1]
     st.write('Closing Balance:', closing_balance)
-
-
-    # Display higher expenses and lower spendings in separate tables
-    higher_expenses = df[df['Amount'] > 100]
-    lower_spendings = df[df['Amount'] < 100]
-
-    st.subheader('Higher Expenses')
-    st.write(higher_expenses)
-
-    st.subheader('Lower Spendings')
-    st.write(lower_spendings)
-
-    # Bar chart to visualize expenses by category
-    st.subheader('Expense Category Breakdown')
-    category_expenses = df.groupby('Category')['Amount'].sum().reset_index()
-    fig = px.bar(category_expenses, x='Category', y='Amount', labels={'Amount': 'Expense Amount'}, title='Expense Category Breakdown')
-    st.plotly_chart(fig)
