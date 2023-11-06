@@ -39,8 +39,8 @@ if uploaded_file is not None:
     df = df.drop(columns=['Description'])
 
     # Create a line graph for both higher expenses and lower spendings
-    higher_expenses = df[df['Amount'] > 200]
-    lower_spendings = df[df['Amount'] < 200]
+    higher_expenses = df[df['Amount'] > 300]
+    lower_spendings = df[df['Amount'] < 300]
 
     higher_expenses['Type'] = 'Higher Expenses'
     lower_spendings['Type'] = 'Lower Spendings'
