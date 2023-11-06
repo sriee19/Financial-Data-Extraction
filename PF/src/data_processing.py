@@ -1,77 +1,70 @@
-# # data_processing.py
-# import pandas as pd
-# from PyPDF2 import PdfReader
-
-# def extract_data_from_pdf(pdf_file):
-#     pdf_data = []
-#     pdf_reader = PdfReader(pdf_file)
-
-#     for page in pdf_reader.pages:
-#         page_text = page.extract_text()
-#         pdf_data.append(page_text)
-
-#     return pdf_data
-
-# def preprocess_and_categorize(pdf_data):
-#     # Perform data preprocessing and categorization as needed
-#     # This function can be extended based on your data and categorization logic
-#     # Example logic for categorization is given here
-
-#     data = pd.DataFrame({'Description': pdf_data})
-#     data['Amount'] = data['Description'].str.extract(r'(\d+\.\d+)').astype(float)
-    
-#     data['Category'] = data['Description'].apply(categorize_expense)
-    
-#     # You can add more preprocessing and categorization logic as required
-    
-#     return data
-
-# def categorize_expense(description):
-#     # Implement your logic to categorize expenses here
-#     # Example: Categorize as 'Housing' if 'rent' is in the description
-#     if "rent" in description.lower():
-#         return "Housing"
-#     elif "groceries" in description.lower():
-#         return "Food"
-#     else:
-#         return "Other"
-
 
 
 # data_processing.py
 import pandas as pd
-from PyPDF2 import PdfReader
+import re
 
-def extract_data_from_pdf(pdf_file):
+def extract_data_from_pdf(uploaded_file):
     pdf_data = []
-    pdf_reader = PdfReader(pdf_file)
 
-    for page in pdf_reader.pages:
-        page_text = page.extract_text()
-        pdf_data.append(page_text)
+    if uploaded_file is not None:
+        pdf_data = uploaded_file.read().decode("utf-8").splitlines()
 
     return pdf_data
 
 def preprocess_and_categorize(pdf_data):
     # Perform data preprocessing and categorization as needed
-    # This function can be extended based on your data and categorization logic
-    # Example logic for categorization is given here
 
-    data = pd.DataFrame({'Description': pdf_data})
-    data['Amount'] = data['Description'].str.extract(r'(\d+\.\d+)').astype(float)
-    
-    data['Category'] = data['Description'].apply(categorize_expense)
-    
-    # You can add more preprocessing and categorization logic as required
-    
+    # Initialize empty lists to store data
+    descriptions = []
+    amounts = []
+    categories = []
+
+    # Define your custom categorization logic here
+    custom_categories = {
+        'Rent': 'Housing',
+        'Groceries': 'Food',
+        'Utilities': 'Utilities',
+        'Transportation': 'Transportation',
+        'Entertainment': 'Entertainment',
+        # Add more custom categories and keywords as needed
+    }
+
+    # Iterate through the extracted PDF data
+    for line in pdf_data:
+        # Extract description and amount (customize this based on your PDF format)
+        description, amount = extract_description_and_amount(line)
+
+        # Categorize expenses based on keywords or patterns in the description
+        category = categorize_expense(description, custom_categories)
+
+        # Add data to the lists
+        descriptions.append(description)
+        amounts.append(amount)
+        categories.append(category)
+
+    # Create a DataFrame with the extracted data
+    data = pd.DataFrame({'Description': descriptions, 'Amount': amounts, 'Category': categories})
+
     return data
 
-def categorize_expense(description):
+def extract_description_and_amount(text):
+    # Customize this function to extract description and amount based on your PDF format
+    description = ""
+    amount = None
+
+    # Example: Extract description and amount using regular expressions
+    match = re.match(r'^(.*?)(\d+\.\d+)$', text)
+    if match:
+        description = match.group(1)
+        amount = float(match.group(2))
+
+    return description, amount
+
+def categorize_expense(description, custom_categories):
     # Implement your logic to categorize expenses here
-    # Example: Categorize as 'Housing' if 'rent' is in the description
-    if "rent" in description.lower():
-        return "Housing"
-    elif "groceries" in description.lower():
-        return "Food"
-    else:
-        return "Other"
+    # Default to "Other" if no match is found in custom_categories
+    for keyword, custom_category in custom_categories.items():
+        if keyword.lower() in description.lower():
+            return custom_category
+    return "Other"
